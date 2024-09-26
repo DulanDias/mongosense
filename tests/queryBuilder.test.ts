@@ -53,4 +53,31 @@ describe('MongoSense Collection Selector', () => {
     // Check if collections contains 'users'
     expect(result.collections).to.deep.equal(['users']);
   });
+
+  // Test for $sort functionality
+  it('should add a $sort stage to the pipeline', () => {
+    const builder = MongoSense().sort({ age: 1 });  // Sort by age in ascending order
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $sort: { age: 1 } }
+    ]);
+    expect(result.collections).to.be.an('array').that.is.empty;
+  });
+
+  // Test for chaining $match and $sort
+  it('should allow chaining $match and $sort stages', () => {
+    const builder = MongoSense()
+      .collection('users')
+      .match({ isActive: true })
+      .sort({ age: -1 });  // Sort by age in descending order
+
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $match: { isActive: true } },
+      { $sort: { age: -1 } }
+    ]);
+    expect(result.collections).to.deep.equal(['users']);
+  });
 });

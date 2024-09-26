@@ -42,3 +42,28 @@ console.log(pipeline);
 * Parameters:
     * criteria: An object representing the filter criteria. This is similar to the MongoDB find() query.
 * Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+### $sort Stage
+
+The `sort()` method is used to add a `$sort` stage to the MongoDB aggregation pipeline. It allows you to sort documents based on specific fields in either ascending or descending order.
+
+#### Example:
+
+```typescript
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .match({ isActive: true })  // Filter for active users
+  .sort({ age: 1 })  // Sort by age in ascending order
+  .build();
+
+console.log(pipeline);
+// Output:
+// [
+//   { $match: { isActive: true } },
+//   { $sort: { age: 1 } }
+// ]
+```
+
+* Parameters:
+    * sortCriteria: An object specifying the field names as keys and the sort order as values. Use 1 for ascending and -1 for descending.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.

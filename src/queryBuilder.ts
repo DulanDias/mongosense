@@ -32,6 +32,21 @@ class MongoSenseQueryBuilder {
       this.pipeline.push({ $match: criteria });
       return this;
     }
+
+     /**
+     * Add a $sort stage to the pipeline.
+     * 
+     * @param sortCriteria - An object specifying the fields and their sort order.
+     * Example: { age: 1 } for ascending, or { age: -1 } for descending.
+     * @returns The MongoSenseQueryBuilder instance (for chaining).
+     * 
+     * @example
+     * const query = MongoSense().sort({ age: 1 }).build();
+     */
+    sort(sortCriteria: Record<string, 1 | -1>) {
+      this.pipeline.push({ $sort: sortCriteria });
+      return this;
+    }
   
     /**
      * Build and return the aggregation pipeline.
