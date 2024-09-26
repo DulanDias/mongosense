@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "esnext",  // Use ES Modules (ESM)
+    "target": "es6",     // Target ECMAScript 6 or higher
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "outDir": "./dist",
+    "rootDir": "./"
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -2,10 +2,11 @@
   "name": "mongosense",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "docs": "typedoc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --loader ts-node/esm ./node_modules/mocha/bin/mocha"
   },
   "keywords": [],
   "author": "",
@@ -15,13 +16,16 @@
     "mongodb": "^6.9.0"
   },
   "devDependencies": {
+    "@types/chai": "^5.0.0",
+    "@types/mocha": "^10.0.8",
     "chai": "^5.1.1",
     "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "mocha": "^10.7.3",
+    "mocha": "^9.2.2",
     "prettier": "^3.3.3",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typedoc": "^0.26.7",
     "typescript": "^5.6.2"
   }
