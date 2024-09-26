@@ -1,5 +1,59 @@
+# MongoSense Query Builder
 
+**MongoSense** is a flexible and easy-to-use MongoDB aggregation pipeline builder. It supports chaining, conditional stage inclusion, and logging for debugging purposes. Build complex pipelines easily with methods that map directly to MongoDB’s aggregation framework.
 
+## Features
+- **Chaining**: Chain multiple aggregation stages easily.
+- **Conditional Query**: Skip stages when conditions aren't met (e.g., when parameters are `null` or `undefined`).
+- **Logging**: Enable `debugMode` to log the pipeline construction process for debugging.
+- **MongoDB Aggregation Stages**: Supports all major MongoDB aggregation stages.
+
+## Installation
+
+```bash
+npm install mongosense
+```
+
+## Usage Example
+
+```typescript
+import { MongoSense } from 'mongosense';
+
+const builder = new MongoSense(true)  // Enable debug mode
+  .collection('users')
+  .match({ isActive: true })  // Add $match stage
+  .addFields({ fullName: { $concat: ['$firstName', ' ', '$lastName'] } })  // Add $addFields stage
+  .project({ firstName: 1, lastName: 1, fullName: 1 })  // Add $project stage
+  .unwind('$orders')  // Add $unwind stage
+  .count('orderCount')  // Add $count stage
+  .sample(10)  // Add $sample stage
+  .build();
+
+console.log(builder);
+```
+
+### Output:
+```json
+{
+  "pipeline": [
+    { "$match": { "isActive": true } },
+    { "$addFields": { "fullName": { "$concat": ["$firstName", " ", "$lastName"] } } },
+    { "$project": { "firstName": 1, "lastName": 1, "fullName": 1 } },
+    { "$unwind": "$orders" },
+    { "$count": "orderCount" },
+    { "$sample": { "size": 10 } }
+  ],
+  "collections": ["users"]
+}
+```
+
+## API Documentation
+
+### `MongoSense(debugMode: boolean = false)`
+Creates a new instance of the MongoSenseQueryBuilder.
+
+- **Parameters**:
+  - `debugMode`: When set to `true`, enables logging of pipeline construction. Default is `false`.
 
 ### Collection Selector
 
@@ -164,9 +218,332 @@ console.log(pipeline);
     * accumulations: Defines the aggregation operations, such as $sum, $avg, $min, or $max.
 * Returns: The instance of the MongoSenseQueryBuilder for method chaining.
 
+### $addFields Stage
+
+The `addFields()` method is used to add new fields to documents in the MongoDB aggregation pipeline.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .addFields({ fullName: { $concat: ['$firstName', ' ', '$lastName'] } })  // Add a fullName field
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $addFields: { fullName: { $concat: ['$firstName', ' ', '$lastName'] } } }
+// ]
+```
+
+* Parameters:
+    * `fields`: An object defining the new fields to add.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $bucket Stage
+
+The `bucket()` method is used to group documents into user-defined buckets based on a specified field.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('sales')  // Select the 'sales' collection
+  .bucket({
+    groupBy: "$amount",
+    boundaries: [0, 100, 200, 300, 400],
+    default: "Other",
+    output: {
+      count: { $sum: 1 },
+      totalAmount: { $sum: "$amount" }
+    }
+  })  // Group sales by amount
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $bucket: { groupBy: "$amount", boundaries: [0, 100, 200, 300, 400], default: "Other", output: { count: { $sum: 1 }, totalAmount: { $sum: "$amount" } } } }
+// ]
+```
+
+* Parameters:
+    * `bucketSpec`: The bucket specification object.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $bucketAuto Stage
+
+The `bucketAuto()` method is used to automatically group documents into a specified number of buckets based on a field.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('sales')  // Select the 'sales' collection
+  .bucketAuto({
+    groupBy: "$amount",
+    buckets: 4,
+    output: {
+      count: { $sum: 1 },
+      totalAmount: { $sum: "$amount" }
+    }
+  })  // Automatically group sales into 4 buckets
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $bucketAuto: { groupBy: "$amount", buckets: 4, output: { count: { $sum: 1 }, totalAmount: { $sum: "$amount" } } } }
+// ]
+```
+
+* Parameters:
+    * `bucketAutoSpec`: The auto bucket specification object.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $count Stage
+
+The `count()` method is used to count the number of documents that pass through the pipeline.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .count('userCount')  // Count the number of users
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $count: "userCount" }
+// ]
+```
+
+* Parameters:
+    * `field`: The name of the field where the count will be stored.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $facet Stage
+
+The `facet()` method is used to run multiple aggregation pipelines in parallel and merge the results.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .facet({
+    ageFacet: [
+      { $match: { age: { $gte: 18 } } },
+      { $count: "adultCount" }
+    ],
+    locationFacet: [
+      { $match: { location: { $exists: true } } },
+      { $count: "locationCount" }
+    ]
+  })  // Run two pipelines: one to count adults, one to count users with locations
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $facet: { ageFacet: [{ $match: { age: { $gte: 18 } } }, { $count: "adultCount" }], locationFacet: [{ $match: { location: { $exists: true } } }, { $count: "locationCount" }] } }
+// ]
+```
+
+* Parameters:
+    * `facetSpec`: An object containing multiple pipelines to run in parallel.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $project Stage
+
+The `project()` method is used to include, exclude, or add new fields to documents in the MongoDB aggregation pipeline.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .project({ firstName: 1, lastName: 1, fullName: { $concat: ['$firstName', ' ', '$lastName'] } })  // Include fullName field
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $project: { firstName: 1, lastName: 1, fullName: { $concat: ['$firstName', ' ', '$lastName'] } } }
+// ]
+```
+
+* Parameters:
+    * `projection`: An object specifying the fields to include, exclude, or compute.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $unwind Stage
+
+The `unwind()` method is used to deconstruct an array field into separate documents.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .unwind('$orders')  // Unwind the 'orders' array field
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $unwind: "$orders" }
+// ]
+```
+
+* Parameters:
+    * `path`: The path to the array field to unwind.
+    * `options`: Additional unwind options (optional).
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $out Stage
+
+The `out()` method is used to write the results of the pipeline to a specified collection.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .out('usersArchive')  // Write the output to the 'usersArchive' collection
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $out: "usersArchive" }
+// ]
+```
+
+* Parameters:
+    * `collection`: The name of the collection to output the results to.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $replaceRoot Stage
+
+The `replaceRoot()` method is used to replace the root document with a new document.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .replaceRoot({ newRoot: "$contactInfo" })  // Replace root with the 'contactInfo' document
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $replaceRoot: { newRoot: "$contactInfo" } }
+// ]
+```
+
+* Parameters:
+    * `newRoot`: The document that will replace the root.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $merge Stage
+
+The `merge()` method is used to merge the pipeline output into an existing collection.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .merge({
+    into: "archivedUsers",
+    whenMatched: "merge",
+    whenNotMatched: "insert"
+  })  // Merge output into the 'archivedUsers' collection
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $merge: { into: "archivedUsers", whenMatched: "merge", whenNotMatched: "insert" } }
+// ]
+```
+
+* Parameters:
+    * `mergeSpec`: The merge specification.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $redact Stage
+
+The `redact()` method is used to restrict the content of documents based on some criteria.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .redact({
+    $cond: {
+      if: { $eq: ['$role', 'admin'] },
+      then: "$$DESCEND",
+      else: "$$PRUNE"
+    }
+  })  // Restrict access to admin documents
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $redact: { $cond: { if: { $eq: ['$role', 'admin'] }, then: "$$DESCEND", else: "$$PRUNE" } } }
+// ]
+```
+
+* Parameters:
+    * `redactExpr`: The redact expression object.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
+### $sample Stage
+
+The `sample()` method is used to randomly select a specified number of documents from the collection.
+
+```typescript
+// Example
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .sample(10)  // Randomly select 10 documents
+  .build();
+
+console.log(pipeline);
+
+// Output:
+// [
+//   { $sample: { size: 10 } }
+// ]
+```
+
+* Parameters:
+    * `size`: The number of documents to randomly select.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+
 ### Conditional Query Construction
 
-MongoSense allows for dynamic and flexible query building with conditional stages. You can add stages like `$match`, `$sort`, `$limit`, `$skip`, `$lookup`, and `$group` only if the input is provided. If `null` or `undefined` is passed, the stage is skipped.
+MongoSense allows for dynamic and flexible query building with conditional stages. You can add stages like `$match`, `$sort`, `$limit`, `$skip`, `$lookup`, `$group`, `$addFields`, `$bucket`, `$bucketAuto`, `$count`, `$facet`, `$project`, `$unwind`, `$out`, `$replaceRoot`, `$merge`, `$redact`, and `$sample` only if the input is provided. If `null` or `undefined` is passed, the stage is skipped.
 
 ```typescript
 // Example:
@@ -175,16 +552,21 @@ const pipeline = MongoSense()
   .match({ isActive: true })  // Add $match stage if criteria is provided
   .sort(null)  // Skip $sort stage if no sorting is needed
   .limit(10)  // Add $limit stage if provided
+  .addFields(null)  // Skip $addFields stage if no fields are provided
+  .sample(10)  // Add $sample stage if size is provided
   .build();
 
 console.log(pipeline);
 // Output:
 // [
 //   { $match: { isActive: true } },
-//   { $limit: 10 }
+//   { $limit: 10 },
+//   { $sample: { size: 10 } }
 // ]
 ```
 
 * Conditional Stages:
-    * If you pass null or undefined to any method, the stage will be skipped.
+    * If you pass `null` or `undefined` to any method, the corresponding stage will be skipped.
+* Supported Stages:
+    * `$match`, `$sort`, `$limit`, `$skip`, `$lookup`, `$group`, `$addFields`, `$bucket`, `$bucketAuto`, `$count`, `$facet`, `$project`, `$unwind`, `$out`, `$replaceRoot`, `$merge`, `$redact`, and `$sample`.
 * Returns: The instance of the MongoSenseQueryBuilder for method chaining.
