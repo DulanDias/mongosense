@@ -23,8 +23,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
-### Additional License Considerations:
-- **Open Source Licensing**: Your project is under the **MIT License**, which is one of the most permissive open-source licenses. It allows others to freely use, modify, and distribute your code as long as they include the original license and copyright notice.
-- **Attribution**: The only requirement is attribution, meaning users must keep your copyright notice and the license terms in any distributed version of your code.
-- **Warranty Disclaimer**: The license disclaims any warranties, protecting you from legal liability if the software doesn’t work as intended.
