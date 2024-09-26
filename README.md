@@ -12,7 +12,6 @@
   - **Index Creation**: Optionally create indexes for recommended fields.
   - **Pipeline Reordering**: Optimizes the order of pipeline stages for better performance.
 
-
 ## Installation
 
 ```bash
@@ -661,42 +660,6 @@ main();
    ```typescript
    const builder = MongoSense(true, intelli);  // Enable debug mode
    ```
-
-### Example Usage with Intelli
-
-```typescript
-import { MongoClient } from 'mongodb';
-import { MongoSense } from './queryBuilder';
-import IntelliOptimizer from './intelli';
-
-async function main() {
-  const client = new MongoClient('mongodb://localhost:27017');
-  await client.connect();
-
-  const intelli = new IntelliOptimizer(client);
-
-  const builder = MongoSense(true, intelli)
-    .collection('orders')
-    .match({ status: 'shipped' })
-    .sort({ shippedDate: -1 })
-    .limit(100);
-
-  // Optimize the query and log recommendations
-  await builder.optimize();
-
-  // Build the optimized pipeline
-  const pipeline = builder.build();
-  console.log('Optimized pipeline:', pipeline);
-
-  // Create recommended indexes
-  const createdIndexes = await builder.createIndexes();
-  console.log('Indexes created:', createdIndexes);
-
-  await client.close();
-}
-
-main();
-```
 
 ## Contributing
 We welcome contributions! If you find a bug or have a feature request, please open an issue. Pull requests are also welcome.

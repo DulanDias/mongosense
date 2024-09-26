@@ -1,6 +1,7 @@
 {
   "name": "mongosense",
   "version": "1.0.0",
+  "description": "MongoSense is a flexible and easy-to-use MongoDB aggregation pipeline builder with IntelliOptimizer for performance-first query optimization.",
   "main": "index.js",
   "type": "module",
   "scripts": {
