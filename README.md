@@ -14,7 +14,7 @@
 npm install mongosense
 ```
 
-### MongoSense Factory Function
+## MongoSense Factory Function
 
 The `MongoSense()` function is a factory that creates and returns an instance of the `MongoSenseQueryBuilder` class. This builder provides a flexible way to construct MongoDB aggregation pipelines using chained methods.
 
