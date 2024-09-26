@@ -14,6 +14,20 @@
 npm install mongosense
 ```
 
+### MongoSense Factory Function
+
+The `MongoSense()` function is a factory that creates and returns an instance of the `MongoSenseQueryBuilder` class. This builder provides a flexible way to construct MongoDB aggregation pipelines using chained methods.
+
+The `MongoSenseQueryBuilder` class provides the following key methods:
+
+- `collection()`: Select one or more collections.
+- `match()`: Add a `$match` stage to filter documents.
+- `sort()`: Add a `$sort` stage to order documents.
+- `limit()`: Add a `$limit` stage to restrict the number of documents.
+- `skip()`: Add a `$skip` stage to skip a number of documents.
+- `lookup()`: Add a `$lookup` stage for left outer joins.
+- `addFields()`, `$bucket()`, `$bucketAuto()`, `$count()`, `$facet()`, `$project()`, `$unwind()`, `$out()`, `$replaceRoot()`, `$merge()`, `$redact()`, `$sample()`.
+
 ## Usage Example
 
 ```typescript

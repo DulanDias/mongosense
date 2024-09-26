@@ -1,9 +1,18 @@
+/**
+ * MongoSenseQueryBuilder is a utility class that helps to construct MongoDB aggregation pipelines
+ * through a series of chained methods that correspond to MongoDB stages.
+ */
 class MongoSenseQueryBuilder {
   private pipeline: any[] = [];  // Store aggregation pipeline stages
   private collectionNames: string[] = [];  // Store collection names
   private logs: string[] = [];  // Store logs for debugging purposes
   private debugMode: boolean;  // Enable or disable logging
 
+  /**
+     * Constructs a new MongoSenseQueryBuilder instance.
+     * 
+     * @param debugMode - A boolean flag to enable logging for debugging purposes.
+     */
   constructor(debugMode = false) {
     this.debugMode = debugMode;  // Initialize debugMode, default is false
   }
@@ -356,7 +365,14 @@ class MongoSenseQueryBuilder {
   }
 }
 
-// Export a factory function to create a new MongoSenseQueryBuilder instance
+/**
+ * Factory function to create a new instance of MongoSenseQueryBuilder.
+ * 
+ * @param debugMode - Optional flag to enable logging. Default is `false`.
+ * @returns An instance of MongoSenseQueryBuilder.
+ */
 export function MongoSense(debugMode: boolean = false): MongoSenseQueryBuilder {
   return new MongoSenseQueryBuilder(debugMode);
 }
+
+export { MongoSenseQueryBuilder };
