@@ -1,12 +1,17 @@
 # MongoSense Query Builder
 
-**MongoSense** is a flexible and easy-to-use MongoDB aggregation pipeline builder. It supports chaining, conditional stage inclusion, and logging for debugging purposes. Build complex pipelines easily with methods that map directly to MongoDB’s aggregation framework.
+**MongoSense** is a flexible and easy-to-use MongoDB aggregation pipeline builder. It supports chaining, conditional stage inclusion, logging for debugging purposes, and advanced query optimization via the **IntelliOptimizer** engine. Build complex pipelines easily with methods that map directly to MongoDB’s aggregation framework while optimizing performance.
 
 ## Features
 - **Chaining**: Chain multiple aggregation stages easily.
 - **Conditional Query**: Skip stages when conditions aren't met (e.g., when parameters are `null` or `undefined`).
 - **Logging**: Enable `debugMode` to log the pipeline construction process for debugging.
 - **MongoDB Aggregation Stages**: Supports all major MongoDB aggregation stages.
+- **Intelli Optimization**: The `IntelliOptimizer` engine provides performance enhancements, including:
+  - **Index Recommendation**: Automatically suggests indexes for fields used in queries.
+  - **Index Creation**: Optionally create indexes for recommended fields.
+  - **Pipeline Reordering**: Optimizes the order of pipeline stages for better performance.
+
 
 ## Installation
 
@@ -584,6 +589,114 @@ console.log(pipeline);
 * Supported Stages:
     * `$match`, `$sort`, `$limit`, `$skip`, `$lookup`, `$group`, `$addFields`, `$bucket`, `$bucketAuto`, `$count`, `$facet`, `$project`, `$unwind`, `$out`, `$replaceRoot`, `$merge`, `$redact`, and `$sample`.
 * Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+## Intelli Optimization Engine
+
+The `IntelliOptimizer` is an optional performance-first engine for query optimization, index recommendations, and index creation in MongoDB. This can be enabled by passing the `IntelliOptimizer` instance to the `MongoSenseQueryBuilder`. It helps reorder query stages for performance and suggests or automatically creates indexes for optimized querying.
+
+### Setup
+
+To use the Intelli optimizer, you need to initialize the `IntelliOptimizer` class with a MongoDB connection and pass it to the `MongoSenseQueryBuilder` factory.
+
+```typescript
+import { MongoClient } from 'mongodb';
+import { MongoSense } from './queryBuilder';
+import IntelliOptimizer from './intelli';
+
+async function main() {
+  const client = new MongoClient('mongodb://localhost:27017');
+  await client.connect();
+
+  // Initialize IntelliOptimizer with the MongoDB client
+  const intelli = new IntelliOptimizer(client);
+
+  const builder = MongoSense(true, intelli)
+    .collection('users')
+    .match({ isActive: true })  // $match stage
+    .sort({ createdAt: -1 })    // $sort stage
+    .limit(10);
+
+  await builder.optimize();  // Perform optimizations (reordering and index recommendations)
+
+  const pipeline = builder.build();
+  console.log(pipeline);
+
+  // Automatically create indexes if necessary
+  await builder.createIndexes();
+
+  await client.close();
+}
+
+main();
+```
+
+### Intelli Features
+
+1. **Index Recommendation**  
+   The Intelli engine can analyze query patterns (such as fields used in `$match` and `$sort` stages) and recommend indexes for those fields if they are not already indexed.
+
+   ```typescript
+   const recommendations = await optimizer.analyzeAndRecommendIndexes('users', ['isActive', 'createdAt']);
+   console.log('Recommended indexes:', recommendations);
+   ```
+
+2. **Automatic Index Creation**  
+   After recommendations are made, Intelli can automatically create indexes for those fields to optimize MongoDB queries.
+
+   ```typescript
+   const createdIndexes = await optimizer.createIndexes('users', ['isActive', 'createdAt']);
+   console.log('Created indexes:', createdIndexes);
+   ```
+
+3. **Pipeline Optimization**  
+   Intelli can reorder the pipeline stages, ensuring that `$match` and `$sort` stages appear earlier in the pipeline for better performance.
+
+   ```typescript
+   await builder.optimize();  // Automatically reorders stages for performance
+   ```
+
+4. **Debug Mode**  
+   When `debugMode` is enabled, Intelli logs its internal operations (such as pipeline optimization and index recommendations) for inspection.
+
+   ```typescript
+   const builder = MongoSense(true, intelli);  // Enable debug mode
+   ```
+
+### Example Usage with Intelli
+
+```typescript
+import { MongoClient } from 'mongodb';
+import { MongoSense } from './queryBuilder';
+import IntelliOptimizer from './intelli';
+
+async function main() {
+  const client = new MongoClient('mongodb://localhost:27017');
+  await client.connect();
+
+  const intelli = new IntelliOptimizer(client);
+
+  const builder = MongoSense(true, intelli)
+    .collection('orders')
+    .match({ status: 'shipped' })
+    .sort({ shippedDate: -1 })
+    .limit(100);
+
+  // Optimize the query and log recommendations
+  await builder.optimize();
+
+  // Build the optimized pipeline
+  const pipeline = builder.build();
+  console.log('Optimized pipeline:', pipeline);
+
+  // Create recommended indexes
+  const createdIndexes = await builder.createIndexes();
+  console.log('Indexes created:', createdIndexes);
+
+  await client.close();
+}
+
+main();
+```
 
 ## Contributing
 We welcome contributions! If you find a bug or have a feature request, please open an issue. Pull requests are also welcome.
