@@ -1,0 +1,7 @@
+node_modules
+tests
+src
+dist/*.map
+*.log
+.git
+.DS_Store
