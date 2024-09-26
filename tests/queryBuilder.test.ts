@@ -258,5 +258,27 @@ describe('MongoSense Collection Selector', () => {
     ]);
   });
 
+  it('should log actions when debugMode is true', () => {
+    const builder = MongoSense(true)  // Enable debugMode
+      .collection('users')
+      .match({ isActive: true })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    const logs = builder.viewLogs();
+    expect(logs).to.be.an('array').that.is.not.empty;
+    expect(logs[0]).to.contain('Selected collections: users');
+  });
+
+  it('should not log actions when debugMode is false', () => {
+    const builder = MongoSense(false)  // Disable debugMode
+      .collection('users')
+      .match({ isActive: true })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    const logs = builder.viewLogs();
+    expect(logs).to.be.an('array').that.is.empty;
+  });
 
 });

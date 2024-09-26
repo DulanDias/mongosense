@@ -1,6 +1,23 @@
 class MongoSenseQueryBuilder {
   private pipeline: any[] = [];  // Store aggregation pipeline stages
   private collectionNames: string[] = [];  // Store collection names
+  private logs: string[] = [];  // Store logs for debugging purposes
+  private debugMode: boolean;  // Enable or disable logging
+
+  constructor(debugMode = false) {
+    this.debugMode = debugMode;  // Initialize debugMode, default is false
+  }
+
+  /**
+     * Conditionally log a message if debugMode is enabled.
+     * 
+     * @param message - The message to log.
+     */
+    private log(message: string) {
+      if (this.debugMode) {
+          this.logs.push(message);
+      }
+  }
 
   /**
    * Select one or more MongoDB collections to build the query on.
@@ -16,6 +33,7 @@ class MongoSenseQueryBuilder {
    */
   collection(...collections: string[]) {
     this.collectionNames.push(...collections);  // Store collection names
+    this.log(`Selected collections: ${collections.join(', ')}`);
     return this;  // Return this for chaining
   }
 
@@ -32,6 +50,7 @@ class MongoSenseQueryBuilder {
   match(criteria: Record<string, any> | null | undefined) {
     if (criteria) {
       this.pipeline.push({ $match: criteria });
+      this.log(`Added $match stage: ${JSON.stringify(criteria)}`);
     }
     return this;
   }
@@ -50,6 +69,7 @@ class MongoSenseQueryBuilder {
   sort(sortCriteria: Record<string, 1 | -1> | null | undefined) {
     if (sortCriteria) {
       this.pipeline.push({ $sort: sortCriteria });
+      this.log(`Added $sort stage: ${JSON.stringify(sortCriteria)}`);
     }
     return this;
   }
@@ -67,6 +87,7 @@ class MongoSenseQueryBuilder {
   limit(limit: number | null | undefined) {
     if (limit) {
       this.pipeline.push({ $limit: limit });
+      this.log(`Added $limit stage: ${limit}`);
     }
     return this;
   }
@@ -84,6 +105,7 @@ class MongoSenseQueryBuilder {
   skip(skip: number | null | undefined) {
     if (skip) {
       this.pipeline.push({ $skip: skip });
+      this.log(`Added $skip stage: ${skip}`);
     }
     return this;
   }
@@ -111,6 +133,7 @@ class MongoSenseQueryBuilder {
           as
         }
       });
+      this.log(`Added $lookup stage: { from: ${from}, localField: ${localField}, foreignField: ${foreignField}, as: ${as} }`);
     }
     return this;
   }
@@ -131,9 +154,20 @@ class MongoSenseQueryBuilder {
       this.pipeline.push({
         $group: { _id: groupBy, ...accumulations }
       });
+      this.log(`Added $group stage: { _id: ${JSON.stringify(groupBy)}, accumulations: ${JSON.stringify(accumulations)} }`);
     }
     return this;
   }
+
+  /**
+     * View the logs recorded during pipeline construction (only available if debugMode is true).
+     * 
+     * @returns An array of log messages.
+     */
+  viewLogs() {
+    return this.logs;
+  }
+
 
   /**
    * Build and return the constructed aggregation pipeline.
@@ -153,6 +187,6 @@ class MongoSenseQueryBuilder {
 }
 
 // Export a factory function to create a new MongoSenseQueryBuilder instance
-export function MongoSense() {
-  return new MongoSenseQueryBuilder();
+export function MongoSense(debugMode: boolean = false): MongoSenseQueryBuilder {
+  return new MongoSenseQueryBuilder(debugMode);
 }
