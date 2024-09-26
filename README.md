@@ -584,3 +584,16 @@ console.log(pipeline);
 * Supported Stages:
     * `$match`, `$sort`, `$limit`, `$skip`, `$lookup`, `$group`, `$addFields`, `$bucket`, `$bucketAuto`, `$count`, `$facet`, `$project`, `$unwind`, `$out`, `$replaceRoot`, `$merge`, `$redact`, and `$sample`.
 * Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+## Contributing
+We welcome contributions! If you find a bug or have a feature request, please open an issue. Pull requests are also welcome.
+
+To contribute:
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to your branch (`git push origin feature/your-feature`)
+5. Open a pull request
+
+## License
+This repository is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for more details.
