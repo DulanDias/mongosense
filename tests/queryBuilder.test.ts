@@ -22,4 +22,35 @@ describe('MongoSense Collection Selector', () => {
     expect(result.pipeline).to.be.an('array').that.is.empty;  // The pipeline is still empty
     expect(result.collections).to.include('users');  // Verify the collection name
   });
+
+  // Test for $match functionality
+  it('should add a $match stage to the pipeline', () => {
+    const builder = MongoSense().match({ isActive: true });
+    const result = builder.build();
+
+    // Check if the result contains the correct $match stage in the pipeline
+    expect(result.pipeline).to.deep.equal([
+      { $match: { isActive: true } }
+    ]);
+
+    // Check if collections are empty (since no collection is specified)
+    expect(result.collections).to.be.an('array').that.is.empty;
+  });
+
+  // Test for chaining after $match
+  it('should allow chaining after $match', () => {
+    const builder = MongoSense()
+      .collection('users')
+      .match({ isActive: true });
+
+    const result = builder.build();
+
+    // Check if the result contains the correct $match stage in the pipeline
+    expect(result.pipeline).to.deep.equal([
+      { $match: { isActive: true } }
+    ]);
+
+    // Check if collections contains 'users'
+    expect(result.collections).to.deep.equal(['users']);
+  });
 });

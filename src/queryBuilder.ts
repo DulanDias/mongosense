@@ -18,6 +18,20 @@ class MongoSenseQueryBuilder {
       this.collectionNames.push(...collections);  // Store collection names
       return this;  // Return this for chaining
     }
+
+    /**
+     * Add a $match stage to filter documents based on criteria.
+     * 
+     * @param criteria - An object representing the match conditions.
+     * @returns The MongoSenseQueryBuilder instance (for chaining).
+     * 
+     * @example
+     * const query = MongoSense().match({ isActive: true }).build();
+     */
+    match(criteria: Record<string, any>) {
+      this.pipeline.push({ $match: criteria });
+      return this;
+    }
   
     /**
      * Build and return the aggregation pipeline.
