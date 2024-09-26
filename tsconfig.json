@@ -1,9 +1,9 @@
 {
-  "compilerOptions": {
-    "module": "esnext",  // Use ES Modules (ESM)
-    "target": "es6",     // Target ECMAScript 6 or higher
-    "moduleResolution": "node",
-    "esModuleInterop": true,
+"compilerOptions": {
+    "module": "esnext",      // Use ES modules
+    "moduleResolution": "node",  // Node module resolution
+    "target": "es2020",      // Target ES2020 or later
+    "esModuleInterop": true, // Ensures interoperability between ES modules and CommonJS
     "skipLibCheck": true,
     "strict": true,
     "outDir": "./dist",

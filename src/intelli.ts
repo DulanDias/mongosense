@@ -74,3 +74,6 @@ export class IntelliOptimizer {
     return [...matchStages, ...sortStages, ...otherStages];
   }
 }
+
+// Export IntelliOptimizer class to be used in other modules
+export default IntelliOptimizer;
