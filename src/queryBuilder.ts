@@ -1,3 +1,5 @@
+import { IntelliOptimizer } from './intelli';
+
 /**
  * MongoSenseQueryBuilder is a utility class that helps to construct MongoDB aggregation pipelines
  * through a series of chained methods that correspond to MongoDB stages.
@@ -7,14 +9,17 @@ class MongoSenseQueryBuilder {
   private collectionNames: string[] = [];  // Store collection names
   private logs: string[] = [];  // Store logs for debugging purposes
   private debugMode: boolean;  // Enable or disable logging
+  private intelli?: IntelliOptimizer;
 
   /**
      * Constructs a new MongoSenseQueryBuilder instance.
      * 
      * @param debugMode - A boolean flag to enable logging for debugging purposes.
+     * @param intelli - An optional IntelliOptimizer instance for query optimization.
      */
-  constructor(debugMode = false) {
-    this.debugMode = debugMode;  // Initialize debugMode, default is false
+  constructor(debugMode: boolean = false, intelli?: IntelliOptimizer) {
+    this.debugMode = debugMode;
+    this.intelli = intelli; // IntelliOptimizer for optimization (optional)
   }
 
   /**
@@ -22,10 +27,10 @@ class MongoSenseQueryBuilder {
      * 
      * @param message - The message to log.
      */
-    private log(message: string) {
-      if (this.debugMode) {
-          this.logs.push(message);
-      }
+  private log(message: string) {
+    if (this.debugMode) {
+      this.logs.push(message);
+    }
   }
 
   /**
@@ -339,6 +344,62 @@ class MongoSenseQueryBuilder {
   }
 
   /**
+   * Optimize the pipeline using the Intelli engine (if available).
+   * This includes reordering stages and analyzing index needs.
+   * 
+   * @returns The optimized pipeline.
+   */
+  async optimize(): Promise<this> {
+    if (this.intelli) {
+      // Optimize pipeline ordering (e.g., moving $match/$sort earlier)
+      this.pipeline = this.intelli.optimizePipeline(this.pipeline);
+      this.log('Pipeline optimized by Intelli.');
+
+      // Suggest or create indexes based on fields in $match and $sort stages
+      const queryFields = this.extractFieldsFromPipeline(['$match', '$sort']);
+      for (const collection of this.collectionNames) {
+        const recommendations = await this.intelli.analyzeAndRecommendIndexes(collection, queryFields);
+        this.log(`Recommended indexes for ${collection}: ${recommendations.join(', ')}`);
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Extract fields from specific stages of the pipeline (e.g., $match, $sort).
+   * 
+   * @param stageNames - An array of stage names to extract fields from.
+   * @returns An array of field names used in the specified stages.
+   */
+  private extractFieldsFromPipeline(stageNames: string[]): string[] {
+    const fields: string[] = [];
+    for (const stage of this.pipeline) {
+      for (const stageName of stageNames) {
+        if (stage[stageName]) {
+          fields.push(...Object.keys(stage[stageName]));
+        }
+      }
+    }
+    return fields;
+  }
+
+  /**
+     * Automatically create indexes for recommended fields.
+     * 
+     * @returns The instance of MongoSenseQueryBuilder after creating indexes.
+     */
+  async createIndexes(): Promise<this> {
+    if (this.intelli) {
+      const queryFields = this.extractFieldsFromPipeline(['$match', '$sort']);
+      for (const collection of this.collectionNames) {
+        const createdIndexes = await this.intelli.createIndexes(collection, queryFields);
+        this.log(`Indexes created for ${collection}: ${createdIndexes.join(', ')}`);
+      }
+    }
+    return this;
+  }
+
+  /**
      * View the logs recorded during pipeline construction (only available if debugMode is true).
      * 
      * @returns An array of log messages.
@@ -346,7 +407,6 @@ class MongoSenseQueryBuilder {
   viewLogs() {
     return this.logs;
   }
-
 
   /**
    * Build and return the constructed aggregation pipeline.
@@ -369,10 +429,11 @@ class MongoSenseQueryBuilder {
  * Factory function to create a new instance of MongoSenseQueryBuilder.
  * 
  * @param debugMode - Optional flag to enable logging. Default is `false`.
+ * @param intelli - Optional IntelliOptimizer instance for query optimization.
  * @returns An instance of MongoSenseQueryBuilder.
  */
-export function MongoSense(debugMode: boolean = false): MongoSenseQueryBuilder {
-  return new MongoSenseQueryBuilder(debugMode);
+export function MongoSense(debugMode: boolean = false, intelli?: IntelliOptimizer): MongoSenseQueryBuilder {
+  return new MongoSenseQueryBuilder(debugMode, intelli);
 }
 
 export { MongoSenseQueryBuilder };

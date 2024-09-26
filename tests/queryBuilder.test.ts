@@ -1,5 +1,8 @@
-import { MongoSense } from '../src/queryBuilder.js'; 
+import { MongoSense, MongoSenseQueryBuilder } from '../src/queryBuilder.js'; 
+import { IntelliOptimizer } from '../src/intelli.js';
 import { expect } from 'chai';
+import sinon from 'sinon';
+import { MongoClient } from 'mongodb';
 
 describe('MongoSense Collection Selector', () => {
   
@@ -295,6 +298,53 @@ describe('MongoSense Collection Selector', () => {
       { $project: { firstName: 1 } },
       { $sample: { size: 10 } }
     ]);
+  });
+
+  let mockClient: any;
+  let mockDb: any;
+  let optimizer: IntelliOptimizer;
+  let builder: MongoSenseQueryBuilder;
+
+  beforeEach(() => {
+    mockClient = sinon.createStubInstance(MongoClient);
+    mockDb = {
+      collection: sinon.stub().returns({
+        indexStats: sinon.stub().returns({ toArray: sinon.stub().resolves([{ key: { isActive: 1 } }]) }),
+        createIndex: sinon.stub().resolves('createdIndex')
+      }),
+      command: sinon.stub().resolves({ collStats: {} })
+    };
+    mockClient.db = sinon.stub().returns(mockDb);
+    optimizer = new IntelliOptimizer(mockClient);
+    builder = MongoSense(true, optimizer);
+  });
+
+  it('should optimize the pipeline by reordering stages', async () => {
+    builder.collection('users')
+      .match({ isActive: true })
+      .sort({ createdAt: -1 });
+    
+    await builder.optimize();
+    const pipeline = builder.build().pipeline;
+
+    // Ensure that $match is followed by $sort
+    expect(pipeline[0]).to.have.property('$match');
+    expect(pipeline[1]).to.have.property('$sort');
+  });
+
+  it('should create recommended indexes', async () => {
+    builder.collection('users')
+      .match({ isActive: true })
+      .sort({ createdAt: -1 });
+
+    await builder.optimize();
+    const createdIndexes = await builder.createIndexes();
+
+    expect(createdIndexes).to.not.be.empty;
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
 });
