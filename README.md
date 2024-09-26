@@ -72,9 +72,9 @@ console.log(pipeline);
 
 The `limit()` and `skip()` methods are used to add `$limit` and `$skip` stages to the MongoDB aggregation pipeline. These stages are essential for pagination, where `skip()` is used to skip a certain number of documents and `limit()` is used to return a limited number of documents.
 
-#### Example:
-
 ```typescript
+// Example:
+
 const pageSize = 10;
 const pageNumber = 3;  // For page 3
 const skip = (pageNumber - 1) * pageSize;
@@ -97,3 +97,10 @@ console.log(pipeline);
     * limit: The number of documents to return.
     * skip: The number of documents to skip.
 * Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+#### Pagination Logic:
+When implementing pagination, you typically calculate how many documents to skip based on the current page number and the page size (number of items per page). Here's the formula:
+
+* Skip Formula: skip = (pageNumber - 1) * pageSize
+* Limit Formula: limit = pageSize
+With the skip() and limit() methods, you can easily create a paginated query.
