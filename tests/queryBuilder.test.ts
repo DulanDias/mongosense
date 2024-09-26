@@ -212,5 +212,51 @@ describe('MongoSense Collection Selector', () => {
     expect(result.collections).to.deep.equal(['sales']);
   });
 
+  it('should skip $match stage if criteria is null', () => {
+    const builder = MongoSense().match(null);
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([]);
+  });
+
+  it('should add $match stage if criteria is provided', () => {
+    const builder = MongoSense().match({ isActive: true });
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $match: { isActive: true } }
+    ]);
+  });
+
+  it('should skip $sort stage if sortCriteria is null', () => {
+    const builder = MongoSense().sort(null);
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([]);
+  });
+
+  it('should add $sort stage if sortCriteria is provided', () => {
+    const builder = MongoSense().sort({ age: 1 });
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $sort: { age: 1 } }
+    ]);
+  });
+
+  it('should allow conditional $match, $sort, and $limit stages', () => {
+    const builder = MongoSense()
+      .match({ isActive: true })  // Add $match
+      .sort(null)                 // Skip $sort
+      .limit(10);                 // Add $limit
+
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $match: { isActive: true } },
+      { $limit: 10 }
+    ]);
+  });
+
 
 });

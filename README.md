@@ -163,3 +163,28 @@ console.log(pipeline);
     * groupBy: Specifies the field (or fields) to group by.
     * accumulations: Defines the aggregation operations, such as $sum, $avg, $min, or $max.
 * Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+### Conditional Query Construction
+
+MongoSense allows for dynamic and flexible query building with conditional stages. You can add stages like `$match`, `$sort`, `$limit`, `$skip`, `$lookup`, and `$group` only if the input is provided. If `null` or `undefined` is passed, the stage is skipped.
+
+```typescript
+// Example:
+const pipeline = MongoSense()
+  .collection('users')
+  .match({ isActive: true })  // Add $match stage if criteria is provided
+  .sort(null)  // Skip $sort stage if no sorting is needed
+  .limit(10)  // Add $limit stage if provided
+  .build();
+
+console.log(pipeline);
+// Output:
+// [
+//   { $match: { isActive: true } },
+//   { $limit: 10 }
+// ]
+```
+
+* Conditional Stages:
+    * If you pass null or undefined to any method, the stage will be skipped.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
