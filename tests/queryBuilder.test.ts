@@ -281,4 +281,20 @@ describe('MongoSense Collection Selector', () => {
     expect(logs).to.be.an('array').that.is.empty;
   });
 
+  it('should add stages only when parameters are provided', () => {
+    const builder = MongoSense(true)
+      .match({ isActive: true })  // Should be added
+      .addFields(null)            // Should be skipped
+      .project({ firstName: 1 })  // Should be added
+      .unwind(null)               // Should be skipped
+      .sample(10);                // Should be added
+
+    const result = builder.build();
+    expect(result.pipeline).to.deep.equal([
+      { $match: { isActive: true } },
+      { $project: { firstName: 1 } },
+      { $sample: { size: 10 } }
+    ]);
+  });
+
 });

@@ -160,6 +160,176 @@ class MongoSenseQueryBuilder {
   }
 
   /**
+   * Add a $addFields stage to add new fields to documents.
+   * 
+   * @param fields - An object defining the new fields to add. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  addFields(fields: Record<string, any> | null | undefined) {
+    if (fields) {
+      this.pipeline.push({ $addFields: fields });
+      this.log(`Added $addFields stage: ${JSON.stringify(fields)}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $bucket stage to group documents into buckets based on a specified field.
+   * 
+   * @param bucketSpec - The bucket specification. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  bucket(bucketSpec: Record<string, any> | null | undefined) {
+    if (bucketSpec) {
+      this.pipeline.push({ $bucket: bucketSpec });
+      this.log(`Added $bucket stage: ${JSON.stringify(bucketSpec)}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $bucketAuto stage to group documents into buckets automatically.
+   * 
+   * @param bucketAutoSpec - The auto bucket specification. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  bucketAuto(bucketAutoSpec: Record<string, any> | null | undefined) {
+    if (bucketAutoSpec) {
+      this.pipeline.push({ $bucketAuto: bucketAutoSpec });
+      this.log(`Added $bucketAuto stage: ${JSON.stringify(bucketAutoSpec)}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $count stage to count the number of documents that pass through the pipeline.
+   * 
+   * @param field - The name of the field that will store the count result. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  count(field: string | null | undefined) {
+    if (field) {
+      this.pipeline.push({ $count: field });
+      this.log(`Added $count stage: ${field}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $facet stage to create multiple pipelines that run in parallel.
+   * 
+   * @param facetSpec - The facet specification. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  facet(facetSpec: Record<string, any> | null | undefined) {
+    if (facetSpec) {
+      this.pipeline.push({ $facet: facetSpec });
+      this.log(`Added $facet stage: ${JSON.stringify(facetSpec)}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $project stage to include, exclude, or add new fields to documents.
+   * 
+   * @param projection - The projection specification. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  project(projection: Record<string, any> | null | undefined) {
+    if (projection) {
+      this.pipeline.push({ $project: projection });
+      this.log(`Added $project stage: ${JSON.stringify(projection)}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $unwind stage to deconstruct an array field from the input documents.
+   * 
+   * @param path - The path to the array field to unwind. Skipped if null or undefined.
+   * @param options - Additional unwind options (optional).
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  unwind(path: string | null | undefined, options?: Record<string, any>) {
+    if (path) {
+      const unwindStage = { $unwind: options ? { path, ...options } : path };
+      this.pipeline.push(unwindStage);
+      this.log(`Added $unwind stage: ${JSON.stringify(unwindStage)}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $out stage to write the results of the pipeline to a collection.
+   * 
+   * @param collection - The collection to output the pipeline results to. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  out(collection: string | null | undefined) {
+    if (collection) {
+      this.pipeline.push({ $out: collection });
+      this.log(`Added $out stage: ${collection}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $replaceRoot stage to replace the root document with a specified document.
+   * 
+   * @param newRoot - The document that will replace the root. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  replaceRoot(newRoot: Record<string, any> | null | undefined) {
+    if (newRoot) {
+      this.pipeline.push({ $replaceRoot: { newRoot } });
+      this.log(`Added $replaceRoot stage: ${JSON.stringify(newRoot)}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $merge stage to merge the pipeline output into an existing collection.
+   * 
+   * @param mergeSpec - The merge specification. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  merge(mergeSpec: Record<string, any> | null | undefined) {
+    if (mergeSpec) {
+      this.pipeline.push({ $merge: mergeSpec });
+      this.log(`Added $merge stage: ${JSON.stringify(mergeSpec)}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $redact stage to restrict the content of documents.
+   * 
+   * @param redactExpr - The redact expression. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  redact(redactExpr: Record<string, any> | null | undefined) {
+    if (redactExpr) {
+      this.pipeline.push({ $redact: redactExpr });
+      this.log(`Added $redact stage: ${JSON.stringify(redactExpr)}`);
+    }
+    return this;
+  }
+
+  /**
+   * Add a $sample stage to randomly select documents from the collection.
+   * 
+   * @param size - The number of documents to randomly select. Skipped if null or undefined.
+   * @returns The MongoSenseQueryBuilder instance (for chaining).
+   */
+  sample(size: number | null | undefined) {
+    if (size) {
+      this.pipeline.push({ $sample: { size } });
+      this.log(`Added $sample stage: ${size}`);
+    }
+    return this;
+  }
+
+  /**
      * View the logs recorded during pipeline construction (only available if debugMode is true).
      * 
      * @returns An array of log messages.
