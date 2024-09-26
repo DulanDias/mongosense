@@ -47,6 +47,34 @@ class MongoSenseQueryBuilder {
       this.pipeline.push({ $sort: sortCriteria });
       return this;
     }
+
+    /**
+     * Add a $limit stage to the pipeline.
+     * 
+     * @param limit - The number of documents to return.
+     * @returns The MongoSenseQueryBuilder instance (for chaining).
+     * 
+     * @example
+     * const query = MongoSense().limit(10).build();
+     */
+    limit(limit: number) {
+      this.pipeline.push({ $limit: limit });
+      return this;
+    }
+
+    /**
+     * Add a $skip stage to implement pagination.
+     * 
+     * @param skip - The number of documents to skip.
+     * @returns The MongoSenseQueryBuilder instance (for chaining).
+     * 
+     * @example
+     * const query = MongoSense().skip(20).build();
+     */
+    skip(skip: number) {
+      this.pipeline.push({ $skip: skip });
+      return this;
+    }
   
     /**
      * Build and return the aggregation pipeline.

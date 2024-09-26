@@ -80,4 +80,43 @@ describe('MongoSense Collection Selector', () => {
     ]);
     expect(result.collections).to.deep.equal(['users']);
   });
+
+  it('should add a $limit stage to the pipeline', () => {
+    const builder = MongoSense().limit(10);  // Limit to 10 documents
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $limit: 10 }
+    ]);
+    expect(result.collections).to.be.an('array').that.is.empty;
+  });
+
+  it('should add a $skip stage to the pipeline', () => {
+    const builder = MongoSense().skip(20);  // Skip 20 documents
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $skip: 20 }
+    ]);
+    expect(result.collections).to.be.an('array').that.is.empty;
+  });
+
+  it('should implement pagination with $skip and $limit stages', () => {
+    const pageSize = 10;
+    const pageNumber = 3;  // For page 3
+    const skip = (pageNumber - 1) * pageSize;
+
+    const builder = MongoSense()
+      .skip(skip)
+      .limit(pageSize);
+
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $skip: 20 },  // For page 3 (skipping 20 documents)
+      { $limit: 10 }  // Limit to 10 documents
+    ]);
+    expect(result.collections).to.be.an('array').that.is.empty;
+  });
+
 });
