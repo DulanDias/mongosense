@@ -159,5 +159,58 @@ describe('MongoSense Collection Selector', () => {
     expect(result.collections).to.deep.equal(['users']);
   });
 
+  it('should add a $group stage to the pipeline with $sum aggregation', () => {
+    const builder = MongoSense().group({ category: "$category" }, { totalSales: { $sum: "$amount" } });
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      {
+        $group: {
+          _id: { category: "$category" },
+          totalSales: { $sum: "$amount" }
+        }
+      }
+    ]);
+    expect(result.collections).to.be.an('array').that.is.empty;
+  });
+
+  it('should add a $group stage with $avg aggregation', () => {
+    const builder = MongoSense().group({ category: "$category" }, { avgPrice: { $avg: "$price" } });
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      {
+        $group: {
+          _id: { category: "$category" },
+          avgPrice: { $avg: "$price" }
+        }
+      }
+    ]);
+    expect(result.collections).to.be.an('array').that.is.empty;
+  });
+
+  // Test chaining $match, $sort, and $group
+  it('should allow chaining $match, $sort, and $group stages', () => {
+    const builder = MongoSense()
+      .collection('sales')
+      .match({ isActive: true })
+      .sort({ date: 1 })
+      .group({ category: "$category" }, { totalSales: { $sum: "$amount" } });
+
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $match: { isActive: true } },
+      { $sort: { date: 1 } },
+      {
+        $group: {
+          _id: { category: "$category" },
+          totalSales: { $sum: "$amount" }
+        }
+      }
+    ]);
+    expect(result.collections).to.deep.equal(['sales']);
+  });
+
 
 });

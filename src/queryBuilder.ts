@@ -99,6 +99,23 @@ class MongoSenseQueryBuilder {
       });
       return this;
     }
+
+    /**
+     * Add a $group stage to perform aggregation.
+     * 
+     * @param groupBy - The field or fields to group by.
+     * @param accumulations - An object that defines aggregation operations.
+     * @returns The MongoSenseQueryBuilder instance (for chaining).
+     * 
+     * @example
+     * const query = MongoSense().group({ _id: "$category" }, { totalSales: { $sum: "$amount" } }).build();
+     */
+    group(groupBy: Record<string, any>, accumulations: Record<string, any>) {
+      this.pipeline.push({
+        $group: { _id: groupBy, ...accumulations }
+      });
+      return this;
+    }
   
     /**
      * Build and return the aggregation pipeline.

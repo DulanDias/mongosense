@@ -135,3 +135,31 @@ console.log(pipeline);
     * foreignField: The field from the target collection to match with the localField.
     * as: The name of the field where the joined documents will be stored.
 * Returns: The instance of the MongoSenseQueryBuilder for method chaining.
+
+### $group Stage
+
+The `group()` method is used to add a `$group` stage to the MongoDB aggregation pipeline. This stage allows you to group documents by a specified key and perform various aggregation operations, such as `$sum`, `$avg`, `$min`, and `$max`.
+
+
+```typescript
+// Example:
+const pipeline = MongoSense()
+  .collection('sales')  // Select the 'sales' collection
+  .group({ category: "$category" }, { totalSales: { $sum: "$amount" } })  // Group by category and sum total sales
+  .build();
+
+console.log(pipeline);
+// Output:
+// [
+//   {
+//     $group: {
+//       _id: { category: "$category" },
+//       totalSales: { $sum: "$amount" }
+//     }
+//   }
+// ]
+```
+* Parameters:
+    * groupBy: Specifies the field (or fields) to group by.
+    * accumulations: Defines the aggregation operations, such as $sum, $avg, $min, or $max.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.
