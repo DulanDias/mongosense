@@ -119,4 +119,45 @@ describe('MongoSense Collection Selector', () => {
     expect(result.collections).to.be.an('array').that.is.empty;
   });
 
+  it('should add a $lookup stage to the pipeline', () => {
+    const builder = MongoSense().lookup('orders', '_id', 'userId', 'userOrders');
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      {
+        $lookup: {
+          from: 'orders',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'userOrders'
+        }
+      }
+    ]);
+    expect(result.collections).to.be.an('array').that.is.empty;
+  });
+
+  // Test chaining $match and $lookup
+  it('should allow chaining $match and $lookup stages', () => {
+    const builder = MongoSense()
+      .collection('users')
+      .match({ isActive: true })
+      .lookup('orders', '_id', 'userId', 'userOrders');
+
+    const result = builder.build();
+
+    expect(result.pipeline).to.deep.equal([
+      { $match: { isActive: true } },
+      {
+        $lookup: {
+          from: 'orders',
+          localField: '_id',
+          foreignField: 'userId',
+          as: 'userOrders'
+        }
+      }
+    ]);
+    expect(result.collections).to.deep.equal(['users']);
+  });
+
+
 });

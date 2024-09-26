@@ -104,3 +104,34 @@ When implementing pagination, you typically calculate how many documents to skip
 * Skip Formula: skip = (pageNumber - 1) * pageSize
 * Limit Formula: limit = pageSize
 With the skip() and limit() methods, you can easily create a paginated query.
+
+### $lookup Stage
+
+The `lookup()` method is used to add a `$lookup` stage to the MongoDB aggregation pipeline. This stage performs a left outer join with another collection, allowing you to merge documents from two collections.
+
+```typescript
+// Example:
+const pipeline = MongoSense()
+  .collection('users')  // Select the 'users' collection
+  .lookup('orders', '_id', 'userId', 'userOrders')  // Join with the 'orders' collection
+  .build();
+
+console.log(pipeline);
+// Output:
+// [
+//   {
+//     $lookup: {
+//       from: 'orders',
+//       localField: '_id',
+//       foreignField: 'userId',
+//       as: 'userOrders'
+//     }
+//   }
+// ]
+```
+* Parameters:
+    * from: The target collection to join with.
+    * localField: The field from the current collection to match with the foreignField.
+    * foreignField: The field from the target collection to match with the localField.
+    * as: The name of the field where the joined documents will be stored.
+* Returns: The instance of the MongoSenseQueryBuilder for method chaining.

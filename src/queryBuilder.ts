@@ -75,6 +75,30 @@ class MongoSenseQueryBuilder {
       this.pipeline.push({ $skip: skip });
       return this;
     }
+
+    /**
+     * Add a $lookup stage to perform a left outer join with another collection.
+     * 
+     * @param from - The target collection to join with.
+     * @param localField - The field from the current collection.
+     * @param foreignField - The field from the target collection.
+     * @param as - The name of the new field to store the joined documents.
+     * @returns The MongoSenseQueryBuilder instance (for chaining).
+     * 
+     * @example
+     * const query = MongoSense().lookup('orders', '_id', 'userId', 'userOrders').build();
+     */
+    lookup(from: string, localField: string, foreignField: string, as: string) {
+      this.pipeline.push({
+        $lookup: {
+          from: from,
+          localField: localField,
+          foreignField: foreignField,
+          as: as
+        }
+      });
+      return this;
+    }
   
     /**
      * Build and return the aggregation pipeline.
