@@ -2,17 +2,20 @@
   "name": "mongosense",
   "version": "1.0.0",
   "description": "MongoSense is a flexible and easy-to-use MongoDB aggregation pipeline builder with IntelliOptimizer for performance-first query optimization.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "build": "tsc",
     "docs": "typedoc",
     "test": "node --loader ts-node/esm ./node_modules/mocha/bin/mocha --trace-warnings --full-trace"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DulanDias/mongosense.git"
+  },
+  "keywords": ["mongodb", "aggregation", "query builder", "intelli"],
+  "author": "Dulan Dias <dulansdias@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "mongodb": "^6.9.0"
   },
